@@ -1,0 +1,411 @@
+/* ---------------------------------------------
+   Tokens
+--------------------------------------------- */
+:root {
+  --paper: #EEEBE2;
+  --paper-2: #E3DFD2;
+  --ink: #17181B;
+  --ink-soft: #55534B;
+  --line: #C6C0AE;
+  --line-strong: #A9A290;
+  --indigo: #33415C;
+  --indigo-deep: #202A3B;
+  --ochre: #A9761F;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --gutter: clamp(20px, 5vw, 64px);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------------
+   Side rail — signature element, spine of the "index"
+--------------------------------------------- */
+.rail {
+  position: fixed;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 0;
+  z-index: 5;
+}
+
+@media (min-width: 900px) {
+  .rail { display: flex; }
+}
+
+.rail-label {
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.rail-line {
+  flex: 1;
+  width: 1px;
+  background: var(--line-strong);
+  margin: 16px 0;
+}
+
+/* ---------------------------------------------
+   Header / nav
+--------------------------------------------- */
+.site-header {
+  padding: 28px var(--gutter) 0;
+}
+
+.top-nav {
+  display: flex;
+  gap: 28px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  padding-bottom: 4px;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.nav-item:hover {
+  border-bottom-color: var(--ink);
+}
+
+/* ---------------------------------------------
+   Hero — the title card
+--------------------------------------------- */
+.hero {
+  padding: clamp(48px, 10vw, 120px) var(--gutter) clamp(56px, 8vw, 96px);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 760px) {
+  .hero {
+    grid-template-columns: 1.4fr 1fr;
+    align-items: end;
+  }
+}
+
+.card-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--ochre);
+  margin: 0 0 18px;
+}
+
+.hero-name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(56px, 10vw, 116px);
+  line-height: 0.94;
+  letter-spacing: -0.01em;
+  margin: 0 0 20px;
+}
+
+.hero-role {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 32ch;
+}
+
+.hero-meta {
+  margin: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.meta-row:last-child { border-bottom: none; }
+
+.meta-row dt {
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.meta-row dd {
+  margin: 0;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--indigo);
+  display: inline-block;
+}
+
+/* ---------------------------------------------
+   Sections
+--------------------------------------------- */
+.section {
+  padding: clamp(56px, 8vw, 88px) var(--gutter);
+  border-bottom: 1px solid var(--line);
+}
+
+.section-heading {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 40px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.heading-num {
+  font-family: var(--font-mono);
+  color: var(--ochre);
+}
+
+/* ---------------------------------------------
+   Index list — catalog entries with reveal swatch
+--------------------------------------------- */
+.index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.index-entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 20px;
+  padding: 22px 4px;
+  border-bottom: 1px solid var(--line);
+  cursor: default;
+  overflow: hidden;
+}
+
+.entry-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.entry-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(19px, 2.6vw, 27px);
+  position: relative;
+  z-index: 2;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.3, 1), color 0.35s ease;
+}
+
+.entry-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  position: relative;
+  z-index: 2;
+}
+
+.entry-swatch {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  z-index: 1;
+  transition: width 0.4s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.swatch-a { background: linear-gradient(135deg, var(--indigo), var(--indigo-deep)); }
+.swatch-b { background: linear-gradient(135deg, var(--ochre), #7C5314); }
+.swatch-c { background: linear-gradient(135deg, #6B6459, #3E3A33); }
+.swatch-d { background: linear-gradient(135deg, #4A5A45, #2B342A); }
+
+.index-entry:hover,
+.index-entry:focus-visible {
+  border-bottom-color: var(--line-strong);
+}
+
+.index-entry:hover .entry-swatch,
+.index-entry:focus-visible .entry-swatch {
+  width: 34%;
+}
+
+.index-entry:hover .entry-title,
+.index-entry:focus-visible .entry-title {
+  transform: translateX(-6px);
+}
+
+@media (max-width: 640px) {
+  .index-entry {
+    grid-template-columns: 40px 1fr;
+    grid-template-areas:
+      "num title"
+      "num meta";
+    row-gap: 4px;
+  }
+  .entry-num { grid-area: num; }
+  .entry-title { grid-area: title; }
+  .entry-meta { grid-area: meta; }
+  .entry-swatch { display: none; }
+}
+
+/* ---------------------------------------------
+   About
+--------------------------------------------- */
+.about-grid {
+  display: grid;
+  gap: 32px;
+  max-width: 900px;
+}
+
+@media (min-width: 760px) {
+  .about-grid { grid-template-columns: 1.3fr 1fr; }
+}
+
+.about-text {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1.5;
+  margin: 0;
+  color: var(--ink);
+}
+
+.tag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-self: start;
+}
+
+.tag-list li {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+
+/* ---------------------------------------------
+   Contact
+--------------------------------------------- */
+.contact-block {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.contact-email {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 44px);
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 4px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.contact-email:hover {
+  color: var(--indigo);
+  border-color: var(--indigo);
+}
+
+.contact-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 24px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.contact-links a {
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 2px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.contact-links a:hover {
+  color: var(--indigo);
+  border-color: var(--indigo);
+}
+
+/* ---------------------------------------------
+   Footer
+--------------------------------------------- */
+.site-footer {
+  padding: 24px var(--gutter) 40px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+}
