@@ -13,16 +13,11 @@
     const stored = localStorage.getItem("theme");
     const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
     const initial = stored || (prefersLight ? "light" : "dark");
-
     root.setAttribute("data-theme", initial);
 
     if (toggle) {
       toggle.addEventListener("click", () => {
-        const next =
-          root.getAttribute("data-theme") === "dark"
-            ? "light"
-            : "dark";
-
+        const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
         root.setAttribute("data-theme", next);
         localStorage.setItem("theme", next);
       });
@@ -37,11 +32,9 @@
   function initEnterGate() {
     const overlay = document.getElementById("enter-overlay");
     const btn = document.getElementById("enter-btn");
-
     if (!overlay || !btn) return;
 
-    const alreadyEntered =
-      sessionStorage.getItem("entered") === "true";
+    const alreadyEntered = sessionStorage.getItem("entered") === "true";
 
     if (alreadyEntered) {
       overlay.classList.add("is-hidden");
@@ -54,13 +47,8 @@
     btn.addEventListener("click", () => {
       sessionStorage.setItem("entered", "true");
       document.body.classList.remove("is-locked");
-
       overlay.classList.add("is-hidden");
-
-      setTimeout(
-        () => overlay.remove(),
-        reduceMotion ? 0 : 550
-      );
+      setTimeout(() => overlay.remove(), reduceMotion ? 0 : 550);
     });
   }
 
@@ -72,9 +60,7 @@
   function initGlobe() {
     const canvas = document.getElementById("globe-canvas");
     const stage = document.getElementById("globe-stage");
-    const labelsContainer =
-      document.getElementById("orbit-labels");
-
+    const labelsContainer = document.getElementById("orbit-labels");
     if (!canvas || !stage || !window.THREE) return;
 
     const renderer = new THREE.WebGLRenderer({
@@ -101,89 +87,51 @@
     const globeGroup = new THREE.Group();
     scene.add(globeGroup);
 
-    /* -----------------------------------------------------------
-       Earth sphere
-    ----------------------------------------------------------- */
-
-    const sphereGeo = new THREE.SphereGeometry(
-      2,
-      48,
-      32
-    );
+    // Solid inner sphere with Earth texture
+    const sphereGeo = new THREE.SphereGeometry(2, 48, 32);
 
     const textureLoader = new THREE.TextureLoader();
 
     const earthTexture = textureLoader.load(
-      "/earth_atmos_2048.jpg",
-      function () {
-        console.log("Earth texture loaded successfully");
-      },
-      undefined,
-      function (error) {
-        console.error(
-          "Earth texture failed to load:",
-          error
-        );
-      }
+      "./earth_atmos_2048.jpg"
     );
 
-    const sphereMat =
-      new THREE.MeshStandardMaterial({
-        map: earthTexture,
-        color: 0xffffff,
-        roughness: 0.8,
-        metalness: 0
-      });
+    earthTexture.colorSpace = THREE.SRGBColorSpace;
 
-    const sphere = new THREE.Mesh(
-      sphereGeo,
-      sphereMat
-    );
+    const sphereMat = new THREE.MeshStandardMaterial({
+      map: earthTexture,
+      roughness: 0.95,
+      metalness: 0.05,
+    });
 
+    const sphere = new THREE.Mesh(sphereGeo, sphereMat);
     globeGroup.add(sphere);
 
-    /* -----------------------------------------------------------
-       Lighting
-    ----------------------------------------------------------- */
-
-    const ambientLight =
-      new THREE.AmbientLight(
-        0xffffff,
-        1.5
-      );
+    // Lighting so the Earth texture is visible
+    const ambientLight = new THREE.AmbientLight(
+      0xffffff,
+      1.5
+    );
 
     scene.add(ambientLight);
 
-    const directionalLight =
-      new THREE.DirectionalLight(
-        0xffffff,
-        2
-      );
-
-    directionalLight.position.set(
-      5,
-      3,
-      5
+    const directionalLight = new THREE.DirectionalLight(
+      0xffffff,
+      2
     );
 
+    directionalLight.position.set(5, 3, 5);
     scene.add(directionalLight);
 
-    /* -----------------------------------------------------------
-       Orbit labels: real 3D points on a sphere around the globe
-    ----------------------------------------------------------- */
-
+    // --- Orbit labels: real 3D points on a sphere around the globe ---
     const labelEls = labelsContainer
       ? Array.from(
-          labelsContainer.querySelectorAll(
-            ".orbit-label"
-          )
+          labelsContainer.querySelectorAll(".orbit-label")
         )
       : [];
 
     const orbitRadius = 3.0;
-
-    const goldenAngle =
-      Math.PI * (3 - Math.sqrt(5));
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
 
     const basePositions = labelEls.map((_, i) => {
       const n = labelEls.length;
@@ -193,52 +141,32 @@
           ? 1 - (i / (n - 1)) * 2
           : 0;
 
-      const radiusAtY =
-        Math.sqrt(
-          Math.max(0, 1 - y * y)
-        );
+      const radiusAtY = Math.sqrt(
+        Math.max(0, 1 - y * y)
+      );
 
-      const theta =
-        goldenAngle * i;
+      const theta = goldenAngle * i;
 
       return new THREE.Vector3(
-        Math.cos(theta) *
-          radiusAtY *
-          orbitRadius,
-
-        y *
-          orbitRadius *
-          0.8,
-
-        Math.sin(theta) *
-          radiusAtY *
-          orbitRadius
+        Math.cos(theta) * radiusAtY * orbitRadius,
+        y * orbitRadius * 0.8,
+        Math.sin(theta) * radiusAtY * orbitRadius
       );
     });
 
-    const yAxis =
-      new THREE.Vector3(0, 1, 0);
-
-    const tmpVec =
-      new THREE.Vector3();
+    const yAxis = new THREE.Vector3(0, 1, 0);
+    const tmpVec = new THREE.Vector3();
 
     function updateLabels() {
       basePositions.forEach((base, i) => {
         const el = labelEls[i];
-
         if (!el) return;
 
         tmpVec
           .copy(base)
-          .applyAxisAngle(
-            yAxis,
-            globeGroup.rotation.y
-          );
+          .applyAxisAngle(yAxis, globeGroup.rotation.y);
 
-        const projected =
-          tmpVec
-            .clone()
-            .project(camera);
+        const projected = tmpVec.clone().project(camera);
 
         const leftPct =
           ((projected.x + 1) / 2) * 100;
@@ -253,46 +181,26 @@
         const opacity =
           0.35 + depth * 0.65;
 
-        el.style.left =
-          leftPct + "%";
-
-        el.style.top =
-          topPct + "%";
-
-        el.style.opacity =
-          opacity.toFixed(2);
-
+        el.style.left = leftPct + "%";
+        el.style.top = topPct + "%";
+        el.style.opacity = opacity.toFixed(2);
         el.style.zIndex =
-          String(
-            Math.round(depth * 100)
-          );
+          String(Math.round(depth * 100));
       });
     }
-
-    /* -----------------------------------------------------------
-       Animation
-    ----------------------------------------------------------- */
 
     let last = performance.now();
 
     function tick(now) {
-      const dt =
-        (now - last) / 1000;
-
+      const dt = (now - last) / 1000;
       last = now;
 
       if (!reduceMotion) {
-        globeGroup.rotation.y +=
-          dt * 0.15;
+        globeGroup.rotation.y += dt * 0.15;
       }
 
       updateLabels();
-
-      renderer.render(
-        scene,
-        camera
-      );
-
+      renderer.render(scene, camera);
       requestAnimationFrame(tick);
     }
 
@@ -304,31 +212,20 @@
   /* -----------------------------------------------------------
      Work filtering — driven by filter chips (and gallery ?filter=)
   ----------------------------------------------------------- */
-
   function initFilters() {
-    const cards =
-      Array.from(
-        document.querySelectorAll(
-          ".project-card"
-        )
-      );
+    const cards = Array.from(
+      document.querySelectorAll(".project-card")
+    );
 
-    const chips =
-      Array.from(
-        document.querySelectorAll(
-          ".filter-chip"
-        )
-      );
+    const chips = Array.from(
+      document.querySelectorAll(".filter-chip")
+    );
 
-    if (!cards.length || !chips.length)
-      return;
+    if (!cards.length || !chips.length) return;
 
     function applyFilter(filter) {
       cards.forEach((card) => {
-        const cats =
-          (card.dataset.category || "")
-            .split(" ");
-
+        const cats = (card.dataset.category || "").split(" ");
         const show =
           filter === "all" ||
           cats.includes(filter);
@@ -348,17 +245,13 @@
     }
 
     chips.forEach((chip) => {
-      chip.addEventListener("click", () => {
-        applyFilter(
-          chip.dataset.filter
-        );
-      });
+      chip.addEventListener("click", () =>
+        applyFilter(chip.dataset.filter)
+      );
     });
 
     const params =
-      new URLSearchParams(
-        window.location.search
-      );
+      new URLSearchParams(window.location.search);
 
     const initialFilter =
       params.get("filter");
@@ -369,6 +262,5 @@
   }
 
   initFilters();
-
 })();
 ```
