@@ -83,33 +83,7 @@
     globeGroup.add(sphere);
 
     // Wireframe grid over the sphere — ties the globe to the page's grid motif
-    const wireGeo = new THREE.SphereGeometry(2.008, 24, 16);
-    const wireframe = new THREE.LineSegments(
-      new THREE.EdgesGeometry(wireGeo, 1),
-      new THREE.LineBasicMaterial({ color: 0x4a5568, transparent: true, opacity: 0.35 })
-    );
-    globeGroup.add(wireframe);
-
-    const ambient = new THREE.AmbientLight(0x22242c, 0.6);
-    scene.add(ambient);
-
-    const key = new THREE.DirectionalLight(0xffffff, 1.4);
-    key.position.set(-3.2, 3.6, 4.5);
-    scene.add(key);
-
-    const rim = new THREE.DirectionalLight(0x8fa3ff, 0.3);
-    rim.position.set(3, -2, -3);
-    scene.add(rim);
-
-    function resize() {
-      const rect = stage.getBoundingClientRect();
-      const size = Math.max(rect.width, 1);
-      renderer.setSize(size, size, false);
-      camera.aspect = 1;
-      camera.updateProjectionMatrix();
-    }
-    resize();
-    window.addEventListener("resize", resize);
+   
 
     // --- Orbit labels: real 3D points on a sphere around the globe ---
     const labelEls = labelsContainer ? Array.from(labelsContainer.querySelectorAll(".orbit-label")) : [];
