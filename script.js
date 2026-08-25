@@ -77,12 +77,8 @@
 
     if (!canvas || !stage || !window.THREE) return;
 
-    /* ---------------------------------------------------------
-       Renderer
-    --------------------------------------------------------- */
-
     const renderer = new THREE.WebGLRenderer({
-      canvas: canvas,
+      canvas,
       alpha: true,
       antialias: true
     });
@@ -91,15 +87,7 @@
       Math.min(window.devicePixelRatio || 1, 2)
     );
 
-    /* ---------------------------------------------------------
-       Scene
-    --------------------------------------------------------- */
-
     const scene = new THREE.Scene();
-
-    /* ---------------------------------------------------------
-       Camera
-    --------------------------------------------------------- */
 
     const camera = new THREE.PerspectiveCamera(
       42,
@@ -110,65 +98,53 @@
 
     camera.position.set(0, 0, 7.2);
 
-    /* ---------------------------------------------------------
-       Globe group
-    --------------------------------------------------------- */
-
     const globeGroup = new THREE.Group();
-
     scene.add(globeGroup);
 
-    /* ---------------------------------------------------------
+    /* -----------------------------------------------------------
        Earth sphere
-    --------------------------------------------------------- */
+    ----------------------------------------------------------- */
 
     const sphereGeo = new THREE.SphereGeometry(
       2,
-      64,
-      64
+      48,
+      32
     );
 
-    const textureLoader =
-      new THREE.TextureLoader();
+    const textureLoader = new THREE.TextureLoader();
 
-    const earthTexture =
-      textureLoader.load(
-        "./earth_atmos_2048.jpg",
-
-        function () {
-          console.log(
-            "Earth texture loaded successfully"
-          );
-        },
-
-        undefined,
-
-        function (error) {
-          console.error(
-            "Earth texture failed to load:",
-            error
-          );
-        }
-      );
+    const earthTexture = textureLoader.load(
+      "/earth_atmos_2048.jpg",
+      function () {
+        console.log("Earth texture loaded successfully");
+      },
+      undefined,
+      function (error) {
+        console.error(
+          "Earth texture failed to load:",
+          error
+        );
+      }
+    );
 
     const sphereMat =
       new THREE.MeshStandardMaterial({
         map: earthTexture,
-        roughness: 0.85,
+        color: 0xffffff,
+        roughness: 0.8,
         metalness: 0
       });
 
-    const sphere =
-      new THREE.Mesh(
-        sphereGeo,
-        sphereMat
-      );
+    const sphere = new THREE.Mesh(
+      sphereGeo,
+      sphereMat
+    );
 
     globeGroup.add(sphere);
 
-    /* ---------------------------------------------------------
+    /* -----------------------------------------------------------
        Lighting
-    --------------------------------------------------------- */
+    ----------------------------------------------------------- */
 
     const ambientLight =
       new THREE.AmbientLight(
@@ -192,171 +168,112 @@
 
     scene.add(directionalLight);
 
-    /* ---------------------------------------------------------
-       Orbit labels
-    --------------------------------------------------------- */
+    /* -----------------------------------------------------------
+       Orbit labels: real 3D points on a sphere around the globe
+    ----------------------------------------------------------- */
 
-    const labelEls =
-      labelsContainer
-        ? Array.from(
-            labelsContainer.querySelectorAll(
-              ".orbit-label"
-            )
+    const labelEls = labelsContainer
+      ? Array.from(
+          labelsContainer.querySelectorAll(
+            ".orbit-label"
           )
-        : [];
+        )
+      : [];
 
     const orbitRadius = 3.0;
 
     const goldenAngle =
-      Math.PI *
-      (3 - Math.sqrt(5));
+      Math.PI * (3 - Math.sqrt(5));
 
-    const basePositions =
-      labelEls.map((_, i) => {
-        const n =
-          labelEls.length;
+    const basePositions = labelEls.map((_, i) => {
+      const n = labelEls.length;
 
-        const y =
-          n > 1
-            ? 1 -
-              (i / (n - 1)) *
-                2
-            : 0;
+      const y =
+        n > 1
+          ? 1 - (i / (n - 1)) * 2
+          : 0;
 
-        const radiusAtY =
-          Math.sqrt(
-            Math.max(
-              0,
-              1 - y * y
-            )
-          );
-
-        const theta =
-          goldenAngle * i;
-
-        return new THREE.Vector3(
-          Math.cos(theta) *
-            radiusAtY *
-            orbitRadius,
-
-          y *
-            orbitRadius *
-            0.8,
-
-          Math.sin(theta) *
-            radiusAtY *
-            orbitRadius
+      const radiusAtY =
+        Math.sqrt(
+          Math.max(0, 1 - y * y)
         );
-      });
+
+      const theta =
+        goldenAngle * i;
+
+      return new THREE.Vector3(
+        Math.cos(theta) *
+          radiusAtY *
+          orbitRadius,
+
+        y *
+          orbitRadius *
+          0.8,
+
+        Math.sin(theta) *
+          radiusAtY *
+          orbitRadius
+      );
+    });
 
     const yAxis =
-      new THREE.Vector3(
-        0,
-        1,
-        0
-      );
+      new THREE.Vector3(0, 1, 0);
 
     const tmpVec =
       new THREE.Vector3();
 
-    /* ---------------------------------------------------------
-       Update label positions
-    --------------------------------------------------------- */
-
     function updateLabels() {
-      basePositions.forEach(
-        (base, i) => {
-          const el =
-            labelEls[i];
+      basePositions.forEach((base, i) => {
+        const el = labelEls[i];
 
-          if (!el) return;
+        if (!el) return;
 
+        tmpVec
+          .copy(base)
+          .applyAxisAngle(
+            yAxis,
+            globeGroup.rotation.y
+          );
+
+        const projected =
           tmpVec
-            .copy(base)
-            .applyAxisAngle(
-              yAxis,
-              globeGroup.rotation.y
-            );
+            .clone()
+            .project(camera);
 
-          const projected =
-            tmpVec
-              .clone()
-              .project(camera);
+        const leftPct =
+          ((projected.x + 1) / 2) * 100;
 
-          const leftPct =
-            ((projected.x + 1) / 2) *
-            100;
+        const topPct =
+          ((1 - projected.y) / 2) * 100;
 
-          const topPct =
-            ((1 - projected.y) / 2) *
-            100;
+        const depth =
+          (tmpVec.z + orbitRadius) /
+          (orbitRadius * 2);
 
-          const depth =
-            (tmpVec.z +
-              orbitRadius) /
-            (orbitRadius * 2);
+        const opacity =
+          0.35 + depth * 0.65;
 
-          const opacity =
-            0.35 +
-            depth * 0.65;
+        el.style.left =
+          leftPct + "%";
 
-          el.style.left =
-            leftPct + "%";
+        el.style.top =
+          topPct + "%";
 
-          el.style.top =
-            topPct + "%";
+        el.style.opacity =
+          opacity.toFixed(2);
 
-          el.style.opacity =
-            opacity.toFixed(2);
-
-          el.style.zIndex =
-            String(
-              Math.round(
-                depth * 100
-              )
-            );
-        }
-      );
+        el.style.zIndex =
+          String(
+            Math.round(depth * 100)
+          );
+      });
     }
 
-    /* ---------------------------------------------------------
-       Resize
-    --------------------------------------------------------- */
-
-    function resize() {
-      const width =
-        stage.clientWidth;
-
-      const height =
-        stage.clientHeight;
-
-      if (!width || !height) return;
-
-      renderer.setSize(
-        width,
-        height,
-        false
-      );
-
-      camera.aspect =
-        width / height;
-
-      camera.updateProjectionMatrix();
-    }
-
-    window.addEventListener(
-      "resize",
-      resize
-    );
-
-    resize();
-
-    /* ---------------------------------------------------------
+    /* -----------------------------------------------------------
        Animation
-    --------------------------------------------------------- */
+    ----------------------------------------------------------- */
 
-    let last =
-      performance.now();
+    let last = performance.now();
 
     function tick(now) {
       const dt =
@@ -376,9 +293,7 @@
         camera
       );
 
-      requestAnimationFrame(
-        tick
-      );
+      requestAnimationFrame(tick);
     }
 
     requestAnimationFrame(tick);
@@ -387,9 +302,9 @@
   initGlobe();
 
   /* -----------------------------------------------------------
-     Work filtering — driven by filter chips
-     (and gallery ?filter=)
+     Work filtering — driven by filter chips (and gallery ?filter=)
   ----------------------------------------------------------- */
+
   function initFilters() {
     const cards =
       Array.from(
@@ -433,14 +348,11 @@
     }
 
     chips.forEach((chip) => {
-      chip.addEventListener(
-        "click",
-        () => {
-          applyFilter(
-            chip.dataset.filter
-          );
-        }
-      );
+      chip.addEventListener("click", () => {
+        applyFilter(
+          chip.dataset.filter
+        );
+      });
     });
 
     const params =
@@ -452,9 +364,7 @@
       params.get("filter");
 
     if (initialFilter) {
-      applyFilter(
-        initialFilter
-      );
+      applyFilter(initialFilter);
     }
   }
 
