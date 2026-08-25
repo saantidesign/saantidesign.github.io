@@ -1,0 +1,7 @@
+<svg viewBox="0 0 640 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+<title id="t">Your name goes here</title>
+<desc id="d">Placeholder — replace assets/name.svg with your own name or logo image.</desc>
+<rect x="1" y="1" width="638" height="158" rx="10" fill="none" stroke="#8B8F98" stroke-width="1" stroke-dasharray="6 6"/>
+<text x="320" y="78" text-anchor="middle" font-family="Georgia, serif" font-size="40" fill="#ECEDEF">Your Name</text>
+<text x="320" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" letter-spacing="1" fill="#8B8F98">REPLACE assets/name.svg WITH YOUR OWN IMAGE</text>
+</svg>
